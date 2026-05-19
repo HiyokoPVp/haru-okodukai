@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>学校に行ってはるにお金を上げよう fixed</title>
+    <title>学校に行ってはるにお金を上げよう</title>
     <style>
         * {
             margin: 0;
@@ -328,6 +328,38 @@
             border-color: #ffc107;
         }
 
+        /* 📋 アップデートログ用追加スタイル */
+        .log-container {
+            padding: 20px;
+            background: #fafafa;
+            border-radius: 8px;
+            border: 1px solid #e0e0e0;
+        }
+
+        .log-item {
+            margin-bottom: 15px;
+            padding-bottom: 15px;
+            border-bottom: 1px dashed #ddd;
+        }
+
+        .log-item:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+
+        .log-version {
+            font-weight: bold;
+            color: #4a90e2;
+            font-size: 16px;
+        }
+
+        .log-text {
+            color: #555;
+            margin-top: 5px;
+            font-size: 14px;
+        }
+
         /* 📱 スマートフォン向けのスタイル調整（レスポンシブ） */
         @media (max-width: 600px) {
             body {
@@ -352,7 +384,6 @@
                 margin-bottom: 20px;
             }
 
-            /* 3つ目の「累計登校日数」カードを横いっぱいに広げて綺麗に収める */
             .stats .stat-card:nth-child(3) {
                 grid-column: span 2;
             }
@@ -384,7 +415,7 @@
             }
 
             .disney-stamps {
-                grid-template-columns: repeat(5, 1fr); /* スマホでは5列にして小さくなりすぎないようにする */
+                grid-template-columns: repeat(5, 1fr);
                 gap: 6px;
             }
 
@@ -420,6 +451,7 @@
         <div class="tabs">
             <button class="tab active" onclick="switchTab('stamps', this)">スタンプ帳</button>
             <button class="tab" onclick="switchTab('disney', this)">ディズニー目標</button>
+            <button class="tab" onclick="switchTab('logs', this)">アップデートログ</button>
         </div>
 
         <div id="stamps" class="tab-content active">
@@ -483,6 +515,17 @@
                 </div>
             </div>
         </div>
+
+        <!-- 📋 アップデートログ用のコンテンツ -->
+        <div id="logs" class="tab-content">
+            <div class="log-container">
+                <h2 style="text-align: center; margin-bottom: 20px;">📋 アップデートログ 📋</h2>
+                <div class="log-item">
+                    <div class="log-version">ver 1.1</div>
+                    <div class="log-text">モバイルのUIとLocalstorageを修正した</div>
+                </div>
+            </div>
+        </div>
     </div>
 
     <script>
@@ -509,7 +552,7 @@
             }));
         }
 
-        // タブ切り替え（引数にelementを追加して安全に切り替え）
+        // タブ切り替え
         function switchTab(tabName, element) {
             document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
             document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
@@ -541,7 +584,6 @@
             const firstDay = new Date(currentYear, currentMonth, 1).getDay();
             const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
             
-            // 時間を0時0分0秒にリセットして純粋に日付だけで比較する
             const today = new Date();
             today.setHours(0, 0, 0, 0);
 
@@ -598,7 +640,6 @@
             }
             saveData();
             renderCalendar();
-            // カレンダー更新時、ディズニー側の表示データも最新にする
             updateDisneyProgress();
         }
 
