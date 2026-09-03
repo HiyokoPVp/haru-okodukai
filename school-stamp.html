@@ -328,7 +328,6 @@
             border-color: #ffc107;
         }
 
-        /* 📋 アップデートログ用追加スタイル */
         .log-container {
             padding: 20px;
             background: #fafafa;
@@ -360,7 +359,6 @@
             font-size: 14px;
         }
 
-        /* 📱 スマートフォン向けのスタイル調整（レスポンシブ） */
         @media (max-width: 600px) {
             body {
                 padding: 10px;
@@ -477,7 +475,7 @@
                 </div>
                 <div class="legend-item">
                     <div class="legend-box on-time"></div>
-                    <span>遅刻なし（1.5スタンプ）</span>
+                    <span>遅刻なし（2スタンプ）</span>
                 </div>
             </div>
 
@@ -516,10 +514,13 @@
             </div>
         </div>
 
-        <!-- 📋 アップデートログ用のコンテンツ -->
         <div id="logs" class="tab-content">
             <div class="log-container">
                 <h2 style="text-align: center; margin-bottom: 20px;">📋 アップデートログ 📋</h2>
+                <div class="log-item">
+                    <div class="log-version">ver 1.2</div>
+                    <div class="log-text">遅刻なしのスタンプを2個に変更。表示と計算のバグを修正。</div>
+                </div>
                 <div class="log-item">
                     <div class="log-version">ver 1.1</div>
                     <div class="log-text">モバイルのUIとLocalstorageを修正した</div>
@@ -631,6 +632,8 @@
 
         // 出席切り替え
         function toggleAttendance(dateStr, element) {
+            const isAddition = !attendanceData[dateStr]; // 新規追加かどうか
+            
             if (!attendanceData[dateStr]) {
                 attendanceData[dateStr] = 'attended';
             } else if (attendanceData[dateStr] === 'attended') {
@@ -641,25 +644,39 @@
             saveData();
             renderCalendar();
             updateDisneyProgress();
+
+            // ディズニー達成アラート（30日に達した瞬間のみ表示）
+            if (isAddition) {
+                const totalDays = Object.keys(attendanceData).length;
+                if (totalDays === 30) {
+                    setTimeout(() => {
+                        alert('🎉🏰 おめでとう！ディズニーに行けるよ！🏰🎉');
+                    }, 100);
+                }
+            }
+        }
+
+        // スタンプ計算ロジック（バグ防止のため関数化）
+        function calculateTotalStamps() {
+            let totalStamps = 0;
+            for (const date in attendanceData) {
+                if (attendanceData[date] === 'ontime') {
+                    totalStamps += 2; // 遅刻なしは2スタンプ
+                } else {
+                    totalStamps += 1; // 通常の登校は1スタンプ
+                }
+            }
+            return totalStamps;
         }
 
         // 統計更新
         function updateStats() {
-            let totalStamps = 0;
-            let totalDays = 0;
-
-            for (const date in attendanceData) {
-                totalDays++;
-                if (attendanceData[date] === 'ontime') {
-                    totalStamps += 1.5;
-                } else {
-                    totalStamps += 1;
-                }
-            }
-
+            const totalStamps = calculateTotalStamps();
+            const totalDays = Object.keys(attendanceData).length;
             const availableStamps = totalStamps - exchangedStamps;
 
-            document.getElementById('currentStamps').textContent = availableStamps.toFixed(1);
+            // 整数で綺麗に表示
+            document.getElementById('currentStamps').textContent = availableStamps;
             document.getElementById('currentMoney').textContent = `¥${Math.floor(availableStamps / 10) * 1500}`;
             document.getElementById('totalDays').textContent = totalDays;
 
@@ -677,15 +694,7 @@
 
         // スタンプ交換
         function exchangeStamps() {
-            let totalStamps = 0;
-            for (const date in attendanceData) {
-                if (attendanceData[date] === 'ontime') {
-                    totalStamps += 1.5;
-                } else {
-                    totalStamps += 1;
-                }
-            }
-
+            const totalStamps = calculateTotalStamps();
             const availableStamps = totalStamps - exchangedStamps;
 
             if (availableStamps >= 10) {
@@ -696,6 +705,7 @@
                 alert(`🎉 ${exchangeCount * 10}スタンプを¥${money}に交換しました！\nおめでとう！`);
                 saveData();
                 renderCalendar();
+                updateDisneyProgress();
             } else {
                 alert('スタンプが足りません。10スタンプ必要です。');
             }
@@ -743,12 +753,6 @@
                     }
                     stampsContainer.appendChild(stamp);
                 }
-            }
-
-            if (totalDays >= 30) {
-                setTimeout(() => {
-                    alert('🎉🏰 おめでとう！ディズニーに行けるよ！🏰🎉');
-                }, 100);
             }
         }
 
